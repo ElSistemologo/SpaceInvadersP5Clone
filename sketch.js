@@ -2,18 +2,20 @@
 //SPACE INVADERS GAME P5.JS - GRUPO CYBER 4/2
 
 var ship;
+var bullets  = [];
+
 let alienImages = [];
 var aliens = [];
-// var bullets = [];
-var bullets  = [];
-let level = 1;
+var alienBullets = [];
 var alienNumber = 12;
 let alienSpeed = 1;
+
+let level = 1;
 let scoreShip = 0;
 let scoreAlien = 0;
 let aliensDead = 0;
 let highScore = 0; // almacenar el puntaje más alto
-let lives = 3;
+let lives = 100;
 
 
 function preload() {
@@ -80,7 +82,8 @@ function draw() {
 
   // while (aliens.length < alienNumber) {
   // }
-  
+
+  // GENERACION E IMPACTO DE BALAS DE la nave
   for (var i = 0; i < bullets.length ; i++) {
     bullets[i].show();
     bullets[i].move();
@@ -95,13 +98,33 @@ function draw() {
         bullets[i].delete();
       }
     }
-
   }
 
+  // GENERACION E IMPACTO DE BALAS DE LOS ALIENS
+  for (var i = 0; i < alienBullets.length ; i++) {
+
+    alienBullets[i].show();
+    alienBullets[i].move();
+
+    if (alienBullets[i].hitsShip(ship)) {
+      lives -= 1;
+      scoreAlien += 100;
+      alienBullets[i].delete();
+      if (lives == 0){
+        //GAME OVER
+        noLoop();
+        textSize(64);
+        fill(255);
+        textAlign(CENTER, CENTER);
+        text("GAME OVER", width/2, height/2);
+   z   }
+    }
+  }
   //seria chevere hacer que cada fila haga shiftDown de forma independiente a las otras filas  (filas nuevas y filas viejas) - no se si alcance a hacerlo -- lo mismo para la velocidad ....
   var AlienEdge = false;
   var ShipEdge = false;
   var AlienLanded = false;
+  var AlienFireProb = 0.001; //probabilidad de que un alien dispare
   for (var i = 0; i < aliens.length ; i++) {
     aliens[i].show();
     aliens[i].move();
@@ -117,6 +140,10 @@ function draw() {
       aliensDead += 1;
       // AlienLanded = false;
     }
+    if (random(1) < AlienFireProb) {
+      var alienBullet = new AlienBullet(aliens[i].x, aliens[i].y);
+      alienBullets.push(alienBullet);
+    }
   }
 
   if (AlienEdge) {
@@ -125,10 +152,18 @@ function draw() {
     }
   }
 
+  //eliminar balas que salen de la pantalla
   for (var i = bullets.length-1; i >= 0  ; i--) {
     if (bullets[i].toDelete) {
       bullets.splice(i, 1);
       
+    }
+  }
+
+  //eliminar balas que salen de la pantalla de los aliens
+  for (var i = alienBullets.length-1; i >= 0  ; i--) {
+    if (alienBullets[i].toDelete) {
+      alienBullets.splice(i, 1);
     }
   }
   
